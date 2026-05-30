@@ -5,6 +5,15 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from transformers import pipeline
+import os
+import cohere
+from dotenv import load_dotenv
+
+load_dotenv()
+
+co = cohere.Client(
+    os.getenv("COHERE_API_KEY")
+)
 
 st.title("📄 RAG Chatbot")
 
@@ -53,15 +62,14 @@ if uploaded_file:
     )
 
     retriever = vectorstore.as_retriever(
-        search_kwargs={"k": 10}
+        search_kwargs={"k": 20}
     )
 
     st.success("Vector Database Created")
 
     generator = pipeline(
     "text2text-generation",
-    model="google/flan-t5-base"
-    )
+    model="google/flan-t5-large"    )
 
     question = st.text_input("Ask a question")
 
@@ -69,9 +77,50 @@ if uploaded_file:
 
         results = retriever.invoke(question)
 
-        context = "\n".join(
-            [doc.page_content for doc in results[:3]]
+        documents = []
+        metadata_map = []
+
+        for doc in results:
+            documents.append(doc.page_content)
+            metadata_map.append(doc.metadata)
+
+        rerank_results = co.rerank(
+            query=question,
+            documents=documents,
+            top_n=5,
+            model="rerank-v3.5"
         )
+
+        top_chunks = []
+        top_sources = []
+
+        seen_chunks = set()
+
+        for result in rerank_results.results:
+
+            chunk = documents[result.index]
+
+            if chunk not in seen_chunks:
+
+                seen_chunks.add(chunk)
+
+                top_chunks.append(chunk)
+
+                top_sources.append(
+                    metadata_map[result.index]
+                )
+
+        for result in rerank_results.results:
+
+            top_chunks.append(
+                documents[result.index]
+            )
+
+            top_sources.append(
+                metadata_map[result.index]
+            )
+
+        context = "\n".join(top_chunks)
 
         prompt = f"""
     Answer the question using ONLY the context below.
@@ -84,7 +133,11 @@ if uploaded_file:
 
     Answer:
     """
+        st.subheader("Reranked Chunks")
 
+        for i, chunk in enumerate(top_chunks, start=1):
+            st.write(f"Chunk {i}")
+            st.write(chunk[:500])
         response = generator(
             prompt,
             max_new_tokens=150
@@ -98,8 +151,8 @@ if uploaded_file:
 
         st.subheader("Sources")
 
-        for doc in results[:3]:
+        for source in top_sources:
 
             st.write(
-                f"Page {doc.metadata['page'] + 1}"
-        )
+                f"Page {source['page'] + 1}"
+            )
