@@ -19,3 +19,27 @@ Difference between RAG and fine-tuning?
 | Faster and cheaper to update                 | More expensive and time-consuming            |
 | Best for document Q&A and dynamic knowledge  | Best for changing model behavior or style    |
 | Uses vector databases and retrieval systems  | Uses training datasets and optimization      |
+
+LangChain
+- PyPDFLoader
+- RecursiveCharacterTextSplitter
+- HuggingFaceEmbeddings
+- ChromaDB
+- Retriever
+
+RAG Improvements
+- Conversation Memory
+- Cohere Reranking
+- Source Citations
+
+Streamlit
+- file_uploader()
+- text_input()
+- Building a web UI for RAG
+
+FastAPI
+- FastAPI()
+- GET endpoints
+- POST endpoints
+- Pydantic BaseModel
+- Swagger Docs
