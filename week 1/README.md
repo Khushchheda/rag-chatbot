@@ -39,3 +39,15 @@ Answer
 - Source Citations
 - RAGAS Evaluation
 - Hugging Face Deployment
+
+# RAG Chatbot
+
+A Retrieval-Augmented Generation (RAG) chatbot built using:
+
+- LangChain
+- ChromaDB
+- HuggingFace Embeddings
+- Cohere Reranking
+- Streamlit
+
+Upload a PDF and ask questions about its content.
