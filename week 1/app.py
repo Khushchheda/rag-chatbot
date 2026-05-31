@@ -68,7 +68,7 @@ if uploaded_file:
     st.success("Vector Database Created")
 
     generator = pipeline(
-    "text2text-generation",
+    "text-generation",
     model="google/flan-t5-large"    )
 
     question = st.text_input("Ask a question")

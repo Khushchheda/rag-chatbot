@@ -11,3 +11,4 @@ pypdf
 cohere
 python-dotenv
 torch
+accelerate
